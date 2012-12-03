@@ -3,9 +3,8 @@ package br.com.globalcode;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.component.properties.PropertiesComponent;
 import org.apache.camel.component.twitter.TwitterComponent;
 
 /**
@@ -19,12 +18,7 @@ public class ThingsRouteBuilder extends RouteBuilder {
     public void configure() {
         initTwitter();
 
-        // tweet what is coming from the file (commands for Things API)
-        from("file:src/data")
-                .convertBodyTo(String.class)
-                .to("twitter://timeline/user");
-        
-        // receive commands (mentions)
+        // receive commands (mentions of @ThingsTwitter)
         from("twitter://timeline/mentions")
                 .process(new ThingsProcessor());
     }
@@ -34,15 +28,14 @@ public class ThingsRouteBuilder extends RouteBuilder {
         getContext().addComponent("twitter", tc);
 
         Properties p = new Properties();
-
         try (InputStream is = getClass().getResourceAsStream("/twitter.properties")) {
             p.load(is);
-        } catch(IOException i) {
+        } catch (IOException i) {
         }
 
-        tc.setAccessToken("");
-        tc.setAccessTokenSecret("");
-        tc.setConsumerKey("");
-        tc.setConsumerSecret("");
+        tc.setAccessToken(p.getProperty("accessToken"));
+        tc.setAccessTokenSecret(p.getProperty("accessTokenSecret"));
+        tc.setConsumerKey(p.getProperty("consumerKey"));
+        tc.setConsumerSecret(p.getProperty("consumerSecret"));
     }
 }
