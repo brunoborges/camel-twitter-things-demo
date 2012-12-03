@@ -19,7 +19,8 @@ public class ThingsRouteBuilder extends RouteBuilder {
         initTwitter();
 
         // receive commands (mentions of @ThingsTwitter)
-        from("twitter://timeline/mentions")
+        // delay in 60 seconds
+        from("twitter://timeline/mentions?type=polling&delay=60")
                 .process(new ThingsProcessor());
     }
 
